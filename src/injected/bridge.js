@@ -117,6 +117,12 @@
 						if (json?.type === 'message_limit' && json.message_limit) {
 							post('cc:message_limit', json.message_limit);
 						}
+						
+						// Catch completion text deltas for real-time token tracking
+						const textDelta = json?.completion || json?.delta?.text;
+						if (textDelta && typeof textDelta === 'string') {
+							post('cc:generation_progress', { textDelta });
+						}
 					} catch {
 						// ignore
 					}

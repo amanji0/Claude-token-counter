@@ -195,9 +195,26 @@
 		}
 	}
 
+	let generationBuffer = '';
+
 	function handleGenerationStart() {
 		if (!currentConversationId) return;
+		generationBuffer = '';
 		ui.setPendingCache(true);
+	}
+
+	function handleGenerationProgress({ textDelta }) {
+		if (!currentConversationId) return;
+		generationBuffer += textDelta || '';
+		
+		// If baseTokens is loaded, we can display the pending tokens
+		if (ui.baseTokens !== null && CC.tokens?.countTokens) {
+			const pending = CC.tokens.countTokens(generationBuffer);
+			if (pending !== ui.pendingTokens) {
+				ui.pendingTokens = pending;
+				ui._updateTokenDisplay();
+			}
+		}
 	}
 
 	async function handleConversationPayload({ orgId, conversationId, data }) {
@@ -215,6 +232,7 @@
 	}
 
 	CC.bridge.on('cc:generation_start', handleGenerationStart);
+	CC.bridge.on('cc:generation_progress', handleGenerationProgress);
 	CC.bridge.on('cc:conversation', handleConversationPayload);
 	CC.bridge.on('cc:message_limit', handleMessageLimit);
 
