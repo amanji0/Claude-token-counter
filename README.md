@@ -2,7 +2,7 @@
 
 > A premium browser extension that displays real-time token count, cache timer, and usage tracking on [claude.ai](https://claude.ai) — with a beautiful glassmorphic design.
 
-![Claude Counter screenshot](./screenshot.png)
+![Claude Counter screenshot](./screenshot.png?v=2)
 
 ## ✨ Features
 
