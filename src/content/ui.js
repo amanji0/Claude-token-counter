@@ -127,7 +127,9 @@
 
 			this.domObserver = null;
 			this.baseTokens = null;
-			this.pendingTokens = 0;
+			this.inputTokens = 0;
+			this.submittedInputTokens = 0;
+			this.generationTokens = 0;
 		}
 
 		getProgressChrome() {
@@ -194,10 +196,10 @@
 			document.body.addEventListener('input', (e) => {
 				const target = e.target;
 				if (target && target.isContentEditable && target.classList.contains('ProseMirror')) {
-					const text = target.textContent || '';
-					const newPending = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
-					if (newPending !== this.pendingTokens) {
-						this.pendingTokens = newPending;
+					const text = target.innerText || target.textContent || '';
+					const newTokens = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
+					if (newTokens !== this.inputTokens) {
+						this.inputTokens = newTokens;
 						this._updateTokenDisplay();
 					}
 				}
@@ -411,7 +413,7 @@
 
 		_updateTokenDisplay() {
 			if (this.baseTokens === null) return;
-			const displayTokens = this.baseTokens + this.pendingTokens;
+			const displayTokens = this.baseTokens + this.inputTokens + this.submittedInputTokens + this.generationTokens;
 			const pct = Math.max(0, Math.min(100, (displayTokens / CC.CONST.CONTEXT_LIMIT_TOKENS) * 100));
 			
 			const newText = `~${displayTokens.toLocaleString()} tokens`;
@@ -640,10 +642,10 @@
 			// Catch programmatic clear of ProseMirror that doesn't fire 'input'
 			if (this.baseTokens !== null) {
 				const pm = document.querySelector('.ProseMirror');
-				const text = pm ? pm.textContent : '';
-				const newPending = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
-				if (newPending !== this.pendingTokens) {
-					this.pendingTokens = newPending;
+				const text = pm ? (pm.innerText || pm.textContent || '') : '';
+				const newTokens = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
+				if (newTokens !== this.inputTokens) {
+					this.inputTokens = newTokens;
 					this._updateTokenDisplay();
 				}
 			}

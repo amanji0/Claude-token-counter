@@ -201,17 +201,22 @@
 		if (!currentConversationId) return;
 		generationBuffer = '';
 		ui.setPendingCache(true);
+		
+		// Freeze current input tokens into submittedInputTokens to prevent drops
+		ui.submittedInputTokens = ui.inputTokens;
+		ui.inputTokens = 0;
+		ui.generationTokens = 0;
+		ui._updateTokenDisplay();
 	}
 
 	function handleGenerationProgress({ textDelta }) {
 		if (!currentConversationId) return;
 		generationBuffer += textDelta || '';
 		
-		// If baseTokens is loaded, we can display the pending tokens
 		if (ui.baseTokens !== null && CC.tokens?.countTokens) {
-			const pending = CC.tokens.countTokens(generationBuffer);
-			if (pending !== ui.pendingTokens) {
-				ui.pendingTokens = pending;
+			const tokens = CC.tokens.countTokens(generationBuffer);
+			if (tokens !== ui.generationTokens) {
+				ui.generationTokens = tokens;
 				ui._updateTokenDisplay();
 			}
 		}
@@ -223,6 +228,11 @@
 		if (!data) return;
 
 		const metrics = await CC.tokens.computeConversationMetrics(data);
+		
+		// The server response includes the submitted prompt and generation
+		ui.submittedInputTokens = 0;
+		ui.generationTokens = 0;
+		
 		ui.setConversationMetrics({ totalTokens: metrics.totalTokens, cachedUntil: metrics.cachedUntil });
 	}
 
