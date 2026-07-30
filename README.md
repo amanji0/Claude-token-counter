@@ -14,9 +14,13 @@
 
 ## 🚀 Installation
 
+### ⬇️ Direct Download
+
+> **[📦 Download claude-counter-0.5.0.zip](https://github.com/amanji0/Claude-token-counter/raw/main/claude-counter-0.5.0.zip)**
+
 ### Chrome / Edge / Chromium
 
-1. Download the latest release zip
+1. **[Download the zip](https://github.com/amanji0/Claude-token-counter/raw/main/claude-counter-0.5.0.zip)** and extract it
 2. Go to `chrome://extensions` and enable **Developer mode**
 3. Click **Load unpacked** and select the extracted folder
 
