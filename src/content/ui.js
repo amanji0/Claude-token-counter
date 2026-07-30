@@ -126,6 +126,8 @@
 			this.refreshingUsage = false;
 
 			this.domObserver = null;
+			this.baseTokens = null;
+			this.pendingTokens = 0;
 		}
 
 		getProgressChrome() {
@@ -185,6 +187,21 @@
 			this._setupTooltips();
 			this._observeDom();
 			this._observeTheme();
+			this._setupInputListener();
+		}
+
+		_setupInputListener() {
+			document.body.addEventListener('input', (e) => {
+				const target = e.target;
+				if (target && target.isContentEditable && target.classList.contains('ProseMirror')) {
+					const text = target.textContent || '';
+					const newPending = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
+					if (newPending !== this.pendingTokens) {
+						this.pendingTokens = newPending;
+						this._updateTokenDisplay();
+					}
+				}
+			});
 		}
 
 		_applyGlassEffect() {
@@ -392,10 +409,62 @@
 			}
 		}
 
+		_updateTokenDisplay() {
+			if (this.baseTokens === null) return;
+			const displayTokens = this.baseTokens + this.pendingTokens;
+			const pct = Math.max(0, Math.min(100, (displayTokens / CC.CONST.CONTEXT_LIMIT_TOKENS) * 100));
+			
+			const newText = `~${displayTokens.toLocaleString()} tokens`;
+			if (this.lengthDisplay.textContent !== newText) {
+				this.lengthDisplay.style.animation = 'none';
+				this.lengthDisplay.offsetHeight; // trigger reflow
+				this.lengthDisplay.style.animation = 'ccPulse 0.4s ease-out';
+			}
+			
+			this.lengthDisplay.textContent = newText;
+
+			// Mini bar
+			const isFull = pct >= 99.5;
+			if (isFull) {
+				this.lengthDisplay.style.opacity = '0.5';
+				if (this.lengthBar) {
+					this.lengthBar = null;
+					this.lengthGroup.replaceChildren(this.lengthDisplay);
+				}
+				if (this.lengthTooltip) {
+					this.lengthTooltip.textContent =
+						"Approximate tokens (excludes system prompt).\nUses a generic tokenizer, may differ from Claude's count.\nThis count is invalid after compaction.";
+				}
+			} else {
+				this.lengthDisplay.style.opacity = '';
+				if (!this.lengthBar) {
+					const bar = document.createElement('div');
+					bar.className = 'cc-bar cc-bar--mini';
+					this.lengthBar = bar;
+					const fill = document.createElement('div');
+					fill.className = 'cc-bar__fill';
+					fill.style.width = `${pct}%`;
+					bar.appendChild(fill);
+					this.refreshProgressChrome();
+
+					const barContainer = document.createElement('span');
+					barContainer.className = 'inline-flex items-center';
+					barContainer.appendChild(bar);
+
+					this.lengthGroup.replaceChildren(this.lengthDisplay, document.createTextNode('\u00A0\u00A0'), barContainer);
+				} else {
+					const fill = this.lengthBar.querySelector('.cc-bar__fill');
+					if (fill) fill.style.width = `${pct}%`;
+				}
+			}
+			this._renderHeader();
+		}
+
 		setConversationMetrics({ totalTokens, cachedUntil } = {}) {
 			this.pendingCache = false;
 
 			if (typeof totalTokens !== 'number') {
+				this.baseTokens = null;
 				this.lengthDisplay.textContent = '';
 				this.cachedDisplay.textContent = '';
 				this.lastCachedUntilMs = null;
@@ -403,43 +472,8 @@
 				return;
 			}
 
-			const pct = Math.max(0, Math.min(100, (totalTokens / CC.CONST.CONTEXT_LIMIT_TOKENS) * 100));
-			
-			if (this.lengthDisplay.textContent !== `~${totalTokens.toLocaleString()} tokens`) {
-				this.lengthDisplay.style.animation = 'none';
-				this.lengthDisplay.offsetHeight; // trigger reflow
-				this.lengthDisplay.style.animation = 'ccPulse 0.4s ease-out';
-			}
-			
-			this.lengthDisplay.textContent = `~${totalTokens.toLocaleString()} tokens`;
-
-			// Mini bar (hide when full - context is definitely compacted by then)
-			const isFull = pct >= 99.5;
-			if (isFull) {
-				this.lengthDisplay.style.opacity = '0.5';
-				this.lengthBar = null;
-				this.lengthGroup.replaceChildren(this.lengthDisplay);
-				if (this.lengthTooltip) {
-					this.lengthTooltip.textContent =
-						"Approximate tokens (excludes system prompt).\nUses a generic tokenizer, may differ from Claude's count.\nThis count is invalid after compaction.";
-				}
-			} else {
-				this.lengthDisplay.style.opacity = '';
-				const bar = document.createElement('div');
-				bar.className = 'cc-bar cc-bar--mini';
-				this.lengthBar = bar;
-				const fill = document.createElement('div');
-				fill.className = 'cc-bar__fill';
-				fill.style.width = `${pct}%`;
-				bar.appendChild(fill);
-				this.refreshProgressChrome();
-
-				const barContainer = document.createElement('span');
-				barContainer.className = 'inline-flex items-center';
-				barContainer.appendChild(bar);
-
-				this.lengthGroup.replaceChildren(this.lengthDisplay, document.createTextNode('\u00A0\u00A0'), barContainer);
-			}
+			this.baseTokens = totalTokens;
+			this._updateTokenDisplay();
 
 			// Cache timer
 			const now = Date.now();
@@ -602,6 +636,17 @@
 			}
 
 			this._updateMarkers();
+
+			// Catch programmatic clear of ProseMirror that doesn't fire 'input'
+			if (this.baseTokens !== null) {
+				const pm = document.querySelector('.ProseMirror');
+				const text = pm ? pm.textContent : '';
+				const newPending = CC.tokens?.countTokens ? CC.tokens.countTokens(text) : 0;
+				if (newPending !== this.pendingTokens) {
+					this.pendingTokens = newPending;
+					this._updateTokenDisplay();
+				}
+			}
 		}
 	}
 

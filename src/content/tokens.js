@@ -205,6 +205,5 @@
 			cachedUntil
 		};
 	}
-
-	CC.tokens = { computeConversationMetrics };
+	CC.tokens = { computeConversationMetrics, countTokens };
 })();
