@@ -314,4 +314,36 @@
 
 	// Keep countdowns + markers updated.
 	setInterval(tick, 1000);
+
+	// Listen for toggle messages from the popup
+	function getRuntime() {
+		return globalThis.browser?.runtime || globalThis.chrome?.runtime || null;
+	}
+
+	const runtime = getRuntime();
+	if (runtime?.onMessage) {
+		runtime.onMessage.addListener((message) => {
+			if (message?.type === 'TOGGLE_COUNTER') {
+				const enabled = message.enabled;
+				if (ui.headerContainer) {
+					ui.headerContainer.style.display = enabled ? '' : 'none';
+				}
+				if (ui.usageLine) {
+					ui.usageLine.style.display = enabled ? '' : 'none';
+				}
+			}
+		});
+	}
+
+	// Check initial enabled state from storage
+	const storage = globalThis.chrome?.storage?.local || globalThis.browser?.storage?.local;
+	if (storage?.get) {
+		storage.get(['counterEnabled'], (result) => {
+			if (result?.counterEnabled === false) {
+				if (ui.headerContainer) ui.headerContainer.style.display = 'none';
+				if (ui.usageLine) ui.usageLine.style.display = 'none';
+			}
+		});
+	}
 })();
+

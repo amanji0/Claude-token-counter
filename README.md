@@ -1,50 +1,80 @@
-# Claude Counter
+# Claude Counter ✨
 
-A minimal browser extension that shows token count, cache timer, and usage bars on claude.ai.
+> A premium browser extension that displays real-time token count, cache timer, and usage tracking on [claude.ai](https://claude.ai) — with a beautiful glassmorphic design.
 
 ![Claude Counter screenshot](./screenshot.png)
 
-## Features
+## ✨ Features
 
-- **Token count** — Approximate token count for the current conversation, with a mini progress bar against the 200k context limit
-- **Cache timer** — Countdown showing how long the conversation remains cached (cheaper to continue)
-- **Usage bars** — Session (5-hour) and weekly (7-day) usage from Claude's native API, with progress bars and reset countdowns (more accurate than the rounded /usage page)
+- **🔢 Token Counter** — Real-time approximate token count for your current conversation, with a sleek progress bar against the 200k context limit
+- **⏱️ Cache Timer** — Live countdown showing how long your conversation stays cached (cheaper to continue)
+- **📊 Usage Bars** — Session (5-hour) and weekly (7-day) usage from Claude's native API, with precise progress bars and reset countdowns
+- **🎨 Premium Design** — Glassmorphic UI with smooth animations, dark/light mode support, and modern aesthetics
+- **🔒 Privacy First** — All data stays local. No external servers, no tracking
 
-## Installation
+## 🚀 Installation
 
-**Chrome / Edge / Chromium**
+### Chrome / Edge / Chromium
 
-1. Download [`claude-counter-0.4.2.zip`](../../releases/download/v0.4.2/claude-counter-0.4.2.zip)
+1. Download the latest release zip
 2. Go to `chrome://extensions` and enable **Developer mode**
-3. Drag and drop the zip onto the page
+3. Click **Load unpacked** and select the extracted folder
 
-**Firefox**
+### Firefox
 
-1. Download [`claude-counter-0.4.2.xpi`](../../releases/download/v0.4.2/claude-counter-0.4.2.xpi)
+1. Download the latest `.xpi` file
 2. Drag it into any Firefox window and click **Add**
 
-**Userscript**
+### From Source
 
-1. Install the userscript from [`claude-counter.user.js`](./userscript/claude-counter.user.js)
+```bash
+git clone https://github.com/amanji0/Claude-token-counter.git
+```
+Then load as unpacked extension in your browser.
 
-## How it works
+## 🛠️ How It Works
 
-- Intercepts Claude's API responses to read conversation data and usage info
-- Uses a vendored tokenizer (`o200k_base`) for approximate token counting
-- Uses Claude’s `/usage` plus live SSE `message_limit` data; the SSE provides exact, unrounded utilization fractions, so the progress bars are more accurate than the rounded percentages shown on Claude’s native /usage page
-- Watches for DOM changes to inject UI elements as you navigate
+- **API Interception** — Hooks into Claude's fetch API to read conversation data and usage info in real-time
+- **Smart Tokenization** — Uses a vendored `o200k_base` tokenizer for accurate approximate token counting
+- **Live SSE Data** — Captures `message_limit` events from Claude's streaming responses for precise usage fractions
+- **DOM Integration** — Seamlessly injects UI elements that blend with Claude's native interface
+- **Intelligent Caching** — Caches token counts per message with content fingerprinting to avoid redundant computation
 
-## Privacy
+## 🔐 Privacy
 
 - All data stays local — no external servers, no tracking
-- Reads your `lastActiveOrg` cookie to query Claude's `/usage` endpoint
+- Reads your `lastActiveOrg` cookie only to query Claude's own `/usage` endpoint
 - Makes requests only to `claude.ai`
+- No data is stored beyond the current session
 
-## Credits
+## 🎨 Design
+
+Claude Counter features a modern glassmorphic design with:
+- Frosted glass backdrop effects
+- Smooth micro-animations and transitions
+- Automatic dark/light mode detection
+- Premium color palette with indigo/violet gradients
+- Responsive layout that adapts to Claude's interface
+
+## 📦 Tech Stack
+
+- **Manifest V3** — Modern Chrome extension API
+- **Vanilla JS** — Zero dependencies, minimal footprint
+- **CSS Custom Properties** — Dynamic theming with CSS variables
+- **gpt-tokenizer** — Vendored o200k_base encoding for token counting
+
+## 🙏 Credits
 
 - Token counting via [gpt-tokenizer](https://github.com/niieani/gpt-tokenizer) (MIT)
 - Inspired by [Claude Usage Tracker](https://github.com/lugia19/Claude-Usage-Extension) by lugia19
+- Design inspired by [claude-counter](https://github.com/she-llac/claude-counter)
 
-## License
+## 📄 License
 
-MIT
+MIT — see [LICENSE](./LICENSE) for details.
+
+---
+
+<p align="center">
+  Made with ❤️ for the Claude community
+</p>

@@ -138,7 +138,9 @@
 				strokeColor: isDark ? CC.COLORS.PROGRESS_OUTLINE_DARK : CC.COLORS.PROGRESS_OUTLINE_LIGHT,
 				fillColor: isDark ? CC.COLORS.PROGRESS_FILL_DARK : CC.COLORS.PROGRESS_FILL_LIGHT,
 				markerColor: isDark ? CC.COLORS.PROGRESS_MARKER_DARK : CC.COLORS.PROGRESS_MARKER_LIGHT,
-				boldColor: isDark ? CC.COLORS.BOLD_DARK : CC.COLORS.BOLD_LIGHT
+				boldColor: isDark ? CC.COLORS.BOLD_DARK : CC.COLORS.BOLD_LIGHT,
+				gradientStart: CC.COLORS.ACCENT_GRADIENT_START,
+				gradientEnd: CC.COLORS.ACCENT_GRADIENT_END
 			};
 		}
 
@@ -161,7 +163,8 @@
 		initialize() {
 			// Header container (tokens + cache timer)
 			this.headerContainer = document.createElement('div');
-			this.headerContainer.className = 'text-text-500 text-xs !px-1 cc-header';
+			this.headerContainer.className = 'text-text-500 text-xs !px-1 cc-header cc-glass';
+			this.headerContainer.style.animation = 'ccFadeIn 0.5s ease-out forwards';
 
 			this.headerDisplay = document.createElement('span');
 			this.headerDisplay.className = 'cc-headerItem';
@@ -176,15 +179,37 @@
 
 			// Usage line (session + weekly)
 			this._initUsageLine();
+			this.usageLine.style.animation = 'ccFadeIn 0.5s ease-out forwards';
 
+			this._applyGlassEffect();
 			this._setupTooltips();
 			this._observeDom();
 			this._observeTheme();
 		}
 
+		_applyGlassEffect() {
+			const root = document.documentElement;
+			const isDark = root.dataset?.mode === 'dark' && root.dataset?.mode !== 'light';
+			
+			const bg = isDark ? CC.COLORS.GLASS_BG_DARK : CC.COLORS.GLASS_BG_LIGHT;
+			const border = isDark ? CC.COLORS.GLASS_BORDER_DARK : CC.COLORS.GLASS_BORDER_LIGHT;
+			
+			if (this.headerContainer) {
+				this.headerContainer.style.background = bg;
+				this.headerContainer.style.borderColor = border;
+			}
+			if (this.usageLine) {
+				this.usageLine.style.background = bg;
+				this.usageLine.style.borderColor = border;
+			}
+		}
+
 		_observeTheme() {
 			// Watch for theme changes (data-mode attribute on <html>)
-			const observer = new MutationObserver(() => this.refreshProgressChrome());
+			const observer = new MutationObserver(() => {
+				this.refreshProgressChrome();
+				this._applyGlassEffect();
+			});
 			observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-mode'] });
 		}
 
@@ -219,7 +244,7 @@
 		_initUsageLine() {
 			this.usageLine = document.createElement('div');
 			this.usageLine.className =
-				'text-text-400 text-[11px] cc-usageRow cc-hidden flex flex-row items-center gap-3 w-full';
+				'text-text-400 text-[11px] cc-usageRow cc-usageRow--glass cc-hidden flex flex-row items-center gap-3 w-full';
 
 			this.sessionUsageSpan = document.createElement('span');
 			this.sessionUsageSpan.className = 'cc-usageText';
@@ -379,6 +404,13 @@
 			}
 
 			const pct = Math.max(0, Math.min(100, (totalTokens / CC.CONST.CONTEXT_LIMIT_TOKENS) * 100));
+			
+			if (this.lengthDisplay.textContent !== `~${totalTokens.toLocaleString()} tokens`) {
+				this.lengthDisplay.style.animation = 'none';
+				this.lengthDisplay.offsetHeight; // trigger reflow
+				this.lengthDisplay.style.animation = 'ccPulse 0.4s ease-out';
+			}
+			
 			this.lengthDisplay.textContent = `~${totalTokens.toLocaleString()} tokens`;
 
 			// Mini bar (hide when full - context is definitely compacted by then)

@@ -1,127 +1,277 @@
-/* Header: tokens + cache timer */
+/* Premium Claude Token Counter Styles */
+:root {
+  --cc-bg-light: rgba(255, 255, 255, 0.75);
+  --cc-border-light: rgba(255, 255, 255, 0.4);
+  --cc-text-light: #334155;
+  --cc-shadow-light: 0 8px 32px rgba(30, 41, 59, 0.08);
+  --cc-glass: blur(12px) saturate(180%);
+
+  --cc-bg-dark: rgba(15, 23, 42, 0.65);
+  --cc-border-dark: rgba(255, 255, 255, 0.08);
+  --cc-text-dark: #f8fafc;
+  --cc-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  --cc-bg: var(--cc-bg-light);
+  --cc-border: var(--cc-border-light);
+  --cc-text: var(--cc-text-light);
+  --cc-shadow: var(--cc-shadow-light);
+
+  --cc-primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --cc-primary-glow: rgba(99, 102, 241, 0.4);
+  --cc-warning: #f59e0b;
+  --cc-danger: #ef4444;
+  --cc-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  --cc-radius: 12px;
+  --cc-stroke: rgba(0,0,0,0.05);
+  --cc-fill: var(--cc-primary-gradient);
+  --cc-fill-warn: var(--cc-warning);
+  --cc-marker: rgba(0,0,0,0.3);
+}
+
+html[data-mode="dark"] {
+  --cc-bg: var(--cc-bg-dark);
+  --cc-border: var(--cc-border-dark);
+  --cc-text: var(--cc-text-dark);
+  --cc-shadow: var(--cc-shadow-dark);
+  --cc-stroke: rgba(255,255,255,0.1);
+  --cc-marker: rgba(255,255,255,0.8);
+}
+
+@keyframes cc-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cc-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Header */
 .cc-header {
-	margin-top: 2px;
-	user-select: none;
+  font-family: var(--cc-font);
+  background: var(--cc-bg);
+  backdrop-filter: var(--cc-glass);
+  -webkit-backdrop-filter: var(--cc-glass);
+  border: 1px solid var(--cc-border);
+  box-shadow: var(--cc-shadow);
+  color: var(--cc-text);
+  border-radius: 20px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  animation: cc-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 50;
+  margin-right: 16px;
+}
+
+.cc-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(30, 41, 59, 0.12);
+}
+
+html[data-mode="dark"] .cc-header:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .cc-headerItem {
-	white-space: nowrap;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Usage row: session + weekly */
+/* Usage Row */
 .cc-usageRow {
-	position: relative;
-	z-index: 50;
-	cursor: pointer;
-	user-select: none;
-	transition: opacity 150ms ease;
+  font-family: var(--cc-font);
+  background: var(--cc-bg);
+  backdrop-filter: var(--cc-glass);
+  -webkit-backdrop-filter: var(--cc-glass);
+  border: 1px solid var(--cc-border);
+  box-shadow: var(--cc-shadow);
+  border-radius: 16px;
+  padding: 12px 20px;
+  margin: 16px auto;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cc-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cc-usageRow:hover {
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: 0 16px 50px rgba(99, 102, 241, 0.1);
+}
+html[data-mode="dark"] .cc-usageRow:hover {
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6);
 }
 
 .cc-usageRow--dim {
-	opacity: 0.6;
+  opacity: 0.5;
+  filter: grayscale(0.5);
 }
 
 .cc-usageGroup {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex: 1;
-	min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-
 .cc-usageGroup--single {
-	width: 100%;
+  justify-content: center;
 }
-
 .cc-usageGroup--weekly {
-	justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .cc-usageText {
-	white-space: nowrap;
+  color: var(--cc-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.cc-usageGroup--weekly .cc-usageText {
+  justify-content: flex-end;
+  gap: 12px;
 }
 
-/* Bars (mini + usage) */
+/* Progress Bars */
 .cc-bar {
-	--cc-radius: 3px;
-	--cc-stroke: transparent;
-	--cc-fill: transparent;
-	--cc-fill-warn: var(--cc-fill);
-	--cc-marker: transparent;
-
-	position: relative;
-	box-sizing: border-box;
-	width: 100%;
-	height: 6px;
-	border-radius: var(--cc-radius);
-	border: 1px solid var(--cc-stroke);
-	overflow: visible;
-	user-select: none;
+  width: 100%;
+  background: var(--cc-stroke);
+  border-radius: var(--cc-radius);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .cc-bar__fill {
-	width: 0%;
-	height: 100%;
-	background: var(--cc-fill);
-	transition: width 300ms ease, background-color 300ms ease;
-	border-top-left-radius: max(0px, calc(var(--cc-radius) - 1px));
-	border-bottom-left-radius: max(0px, calc(var(--cc-radius) - 1px));
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
+  height: 100%;
+  background: var(--cc-fill);
+  border-radius: var(--cc-radius);
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
 }
 
-.cc-bar__fill.cc-full {
-	border-top-right-radius: max(0px, calc(var(--cc-radius) - 1px));
-	border-bottom-right-radius: max(0px, calc(var(--cc-radius) - 1px));
+/* Glow effect */
+.cc-bar__fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  filter: blur(8px);
+  opacity: 0.6;
+  z-index: -1;
+  border-radius: inherit;
 }
 
 .cc-bar__fill.cc-warn {
-	background: var(--cc-fill-warn);
+  background: var(--cc-fill-warn);
+}
+.cc-bar__fill.cc-full {
+  background: var(--cc-danger);
 }
 
 .cc-bar__marker {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0%;
-	width: 2px;
-	background: var(--cc-marker);
-	pointer-events: none;
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--cc-marker);
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  z-index: 2;
 }
 
 .cc-bar--mini {
-	width: 60px;
-	height: 7px;
-	--cc-radius: 2px;
+  height: 6px;
+  width: 60px;
 }
-
 .cc-bar--usage {
-	height: 10px;
-	flex: 1;
+  height: 10px;
+  width: 100%;
 }
 
 /* Tooltips */
 .cc-tooltip {
-	position: fixed;
-	z-index: 9999;
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 12px;
-	white-space: pre-line;
-	user-select: none;
-	pointer-events: none;
-	opacity: 0;
-	transition: opacity 200ms ease;
+  position: fixed;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--cc-font);
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  transform: translate(-50%, -10px);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
 }
 
-.cc-tooltipTrigger {
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	user-select: none;
-	cursor: help;
+.cc-tooltipTrigger:hover + .cc-tooltip,
+.cc-tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -20px);
 }
 
-/* Hide optional elements completely (no layout space) */
 .cc-hidden {
-	display: none !important;
+  display: none !important;
 }
+
+.cc-cacheTime {
+  color: var(--cc-warning);
+  font-weight: 600;
+  display: inline-block;
+  animation: cc-pulse 2s infinite ease-in-out;
+}
+
+/* Keyframe aliases for JS references */
+@keyframes ccFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ccPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* Glassmorphism classes */
+.cc-glass {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+.cc-usageRow--glass {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
+/* Tooltip whitespace fix */
+.cc-tooltip {
+  white-space: pre-line;
+}
+
